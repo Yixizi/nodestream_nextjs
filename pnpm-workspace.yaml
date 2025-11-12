@@ -1,0 +1,10 @@
+ignoredBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - '@sentry/cli'
+  - esbuild
+  - inngest-cli
+  - prisma
+  - protobufjs
+  - sharp
+  - unrs-resolver
