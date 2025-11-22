@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
+import { signIn } from "@/lib/auth-client";
 import { toast } from "sonner";
 import Image from "next/image";
 
@@ -44,7 +44,7 @@ export function LoginForm() {
   });
   const onSubmit = async (data: loginFormValues) => {
     console.log(data);
-    await authClient.signIn.email(
+    await signIn.email(
       {
         email: data.email,
         password: data.password,

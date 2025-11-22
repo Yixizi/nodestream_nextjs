@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
+import { signUp } from "@/lib/auth-client";
 import { toast } from "sonner";
 
 const registerSchema = z
@@ -51,7 +51,7 @@ export function RegisterForm() {
   });
   const onSubmit = async (data: registerFormValues) => {
     console.log(data);
-    await authClient.signUp.email(
+    await signUp.email(
       {
         name: data.email,
         email: data.email,

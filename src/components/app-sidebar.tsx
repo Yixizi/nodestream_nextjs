@@ -22,6 +22,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { useHasActiveSubscription } from "@/features/subscriptions/hooks/use-subscription";
 
 const menuItems = [
   {
@@ -49,6 +50,7 @@ const menuItems = [
 export const AppSidebar = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const { hasActiveSubscription, isLoading } = useHasActiveSubscription();
   return (
     <Sidebar>
       <SidebarHeader>
@@ -95,19 +97,39 @@ export const AppSidebar = () => {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
+          {!hasActiveSubscription && !isLoading && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={() =>
+                  authClient.checkout({
+                    slug: "pro",
+                  })
+                }
+                tooltip="升级至专业版"
+                className="gap-x-4 h-10 px-4"
+              >
+                <StarIcon className="size-4" />
+                <span>升级至专业版</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+          {/* <SidebarMenuItem>
             <SidebarMenuButton
-              onClick={() => {}}
+              onClick={() =>
+                authClient.checkout({
+                  slug: "pro",
+                })
+              }
               tooltip="升级至专业版"
               className="gap-x-4 h-10 px-4"
             >
               <StarIcon className="size-4" />
               <span>升级至专业版</span>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
           <SidebarMenuItem>
             <SidebarMenuButton
-              onClick={() => {}}
+              onClick={() => authClient.customer.portal()}
               tooltip="账单中心"
               className="gap-x-4 h-10 px-4"
             >

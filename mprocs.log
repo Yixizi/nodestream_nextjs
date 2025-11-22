@@ -1,6 +1,0 @@
-ERROR [portable_pty::win::psuedocon] CreateProcessW `"\"C:\\Program Files\\nodejs\\pnpm\" inngest:dev\0"` in cwd `Some("D:\\react-node\\streamnode\0")` failed: %1 不是有效的 Win32 应用程序。 (os error 193)
-ERROR [portable_pty::win::psuedocon] CreateProcessW `"\"C:\\Program Files\\nodejs\\pnpm\" dev\0"` in cwd `Some("D:\\react-node\\streamnode\0")` failed: %1 不是有效的 Win32 应用程序。 (os error 193)
-ERROR [mprocs::error] Error: channel closed
-ERROR [portable_pty::win::psuedocon] CreateProcessW `"\"C:\\Program Files\\nodejs\\pnpm\" inngest:dev\0"` in cwd `Some("D:\\react-node\\streamnode\0")` failed: %1 不是有效的 Win32 应用程序。 (os error 193)
-ERROR [portable_pty::win::psuedocon] CreateProcessW `"\"C:\\Program Files\\nodejs\\pnpm\" dev\0"` in cwd `Some("D:\\react-node\\streamnode\0")` failed: %1 不是有效的 Win32 应用程序。 (os error 193)
-ERROR [mprocs::error] Error: channel closed
