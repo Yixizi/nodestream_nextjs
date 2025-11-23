@@ -5,20 +5,23 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useWorkflowsParams } from "./use-workflows-params";
 
 export const useSuspenseWorkflows = () => {
   const trpc = useTRPC();
-  return useSuspenseQuery(trpc.workflows.getMany.queryOptions());
+  const [params] = useWorkflowsParams();
+  return useSuspenseQuery(trpc.workflows.getMany.queryOptions(params));
 };
 
 export const useCreateWorkflow = () => {
   const queryClient = useQueryClient();
+
   const trpc = useTRPC();
   return useMutation(
     trpc.workflows.create.mutationOptions({
       onSuccess: (data) => {
         toast.success(`工作流 ${data.name} 创建成功`);
-        queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions());
+        queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({}));
       },
       onError: (error) => {
         toast.error(`创建工作流失败: ${error.message}`);

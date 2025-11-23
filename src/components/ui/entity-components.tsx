@@ -1,6 +1,7 @@
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, SearchIcon } from "lucide-react";
 import { Button } from "./button";
 import Link from "next/link";
+import { Input } from "./input";
 
 type EntityHeaderProps = {
   //   children: React.ReactNode;
@@ -73,6 +74,71 @@ export const EntityContainer = ({
           {children}
         </div>
         {pagination}
+      </div>
+    </div>
+  );
+};
+
+interface EntitySearchProps {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}
+
+export const EntitySearch = ({
+  value,
+  onChange,
+  placeholder = "Search",
+}: EntitySearchProps) => {
+  return (
+    <div className=" relative ml-auto">
+      <SearchIcon className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+      <Input
+        className=" max-w-[200px] pl-8 bg-background shadow-none border-border"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+      />
+    </div>
+  );
+};
+
+interface EntityPaginationProps {
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  disabled?: boolean;
+}
+
+export const EntityPagination = ({
+  page,
+  totalPages,
+  onPageChange,
+  disabled,
+}: EntityPaginationProps) => {
+  return (
+    <div className=" flex items-center justify-between gap-x-2 w-full">
+      <div className=" flex-1 text-sm text-muted-foreground">
+        {page} / {totalPages || 1} 页
+      </div>
+      <div className=" flex items-center justify-end space-x-2 py-4 ">
+        <Button
+          disabled={page <= 1 || disabled}
+          onClick={() => onPageChange(Math.max(page - 1, 1))}
+          variant={"outline"}
+          size={"sm"}
+        >
+          上一页
+        </Button>
+
+        <Button
+          disabled={disabled || page >= totalPages || totalPages === 0}
+          onClick={() => onPageChange(Math.min(page + 1, totalPages))}
+          variant={"outline"}
+          size={"sm"}
+        >
+          下一页
+        </Button>
       </div>
     </div>
   );
