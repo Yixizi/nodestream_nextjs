@@ -1,7 +1,22 @@
-import { PlusIcon, SearchIcon } from "lucide-react";
+import {
+  Loader2Icon,
+  Package,
+  PackageOpenIcon,
+  PlusIcon,
+  SearchIcon,
+} from "lucide-react";
 import { Button } from "./button";
 import Link from "next/link";
 import { Input } from "./input";
+import { AlertDialogTrigger } from "./alert-dialog";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "./empty";
 
 type EntityHeaderProps = {
   //   children: React.ReactNode;
@@ -141,5 +156,49 @@ export const EntityPagination = ({
         </Button>
       </div>
     </div>
+  );
+};
+
+interface StateViewProps {
+  message?: string;
+}
+
+export const LoadingView = ({ message }: StateViewProps) => {
+  return (
+    <div className=" flex items-center justify-center h-full flex-1 flex-col gap-y-4 ">
+      <Loader2Icon className="size-6 animate-spin text-primary" />
+      {!!message && <p className=" text-sm text-muted-foreground">{message}</p>}
+    </div>
+  );
+};
+
+export const ErrorView = ({ message }: StateViewProps) => {
+  return (
+    <div className=" flex items-center justify-center h-full flex-1 flex-col gap-y-4 ">
+      <AlertDialogTrigger className="size-6  text-primary" />
+      {!!message && <p className=" text-sm text-muted-foreground">{message}</p>}
+    </div>
+  );
+};
+
+interface EmptyViewProps extends StateViewProps {
+  onNew?: () => void;
+}
+export const EmptyView = ({ message, onNew }: EmptyViewProps) => {
+  return (
+    <Empty className=" border border-dashed bg-white">
+      <EmptyHeader>
+        <EmptyMedia variant={"icon"}>
+          <PackageOpenIcon />
+        </EmptyMedia>
+      </EmptyHeader>
+      <EmptyTitle>暂无数据</EmptyTitle>
+      {!!message && <EmptyDescription>{message}</EmptyDescription>}
+      {!!onNew && (
+        <EmptyContent>
+          <Button onClick={onNew}>创建</Button>
+        </EmptyContent>
+      )}
+    </Empty>
   );
 };
