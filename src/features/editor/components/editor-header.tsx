@@ -53,7 +53,8 @@ export const EditorNameInput = ({ workflowId }: { workflowId: string }) => {
     if (updateWorkflow.isPending) {
       return;
     }
-
+    if (name === workflow.name) return;
+    
     if (name.trim() === "") {
       toast.error("工作流名称不能为空");
       return;
