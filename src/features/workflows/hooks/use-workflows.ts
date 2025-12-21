@@ -7,12 +7,14 @@ import {
 import { toast } from "sonner";
 import { useWorkflowsParams } from "./use-workflows-params";
 
+//获取工作流列表
 export const useSuspenseWorkflows = () => {
   const trpc = useTRPC();
   const [params] = useWorkflowsParams();
   return useSuspenseQuery(trpc.workflows.getMany.queryOptions(params));
 };
 
+//创建工作流
 export const useCreateWorkflow = () => {
   const queryClient = useQueryClient();
 
@@ -30,6 +32,7 @@ export const useCreateWorkflow = () => {
   );
 };
 
+//删除工作流
 export const useRemoveWorkflow = () => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -47,12 +50,14 @@ export const useRemoveWorkflow = () => {
   );
 };
 
+//获取工作流
 export const useSuspenseWorkflow = (id: string) => {
   const trpc = useTRPC();
 
   return useSuspenseQuery(trpc.workflows.getOne.queryOptions({ id }));
 };
 
+//更新工作流名称
 export const useUpdateWorkflowName = () => {
   const queryClient = useQueryClient();
 
@@ -68,6 +73,27 @@ export const useUpdateWorkflowName = () => {
       },
       onError: (error) => {
         toast.error(`更新工作流名称失败: ${error.message}`);
+      },
+    }),
+  );
+};
+
+//更新工作流
+export const useUpdateWorkflow = () => {
+  const queryClient = useQueryClient();
+  const trpc = useTRPC();
+
+  return useMutation(
+    trpc.workflows.update.mutationOptions({
+      onSuccess: (data) => {
+        toast.success(`工作流 ${data.name} 更新成功`);
+        queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({}));
+        queryClient.invalidateQueries(
+          trpc.workflows.getOne.queryOptions({ id: data.id }),
+        );
+      },
+      onError: (error) => {
+        toast.error(`更新工作流失败: ${error.message}`);
       },
     }),
   );

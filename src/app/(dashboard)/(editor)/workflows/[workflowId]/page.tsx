@@ -1,12 +1,11 @@
-import { AppHeader } from "@/components/app-header";
 import {
   Editor,
   EditorError,
   EditorLoading,
 } from "@/features/editor/components/editor";
 import { EditorHeader } from "@/features/editor/components/editor-header";
-import { WorkflowsContainer } from "@/features/workflows/components/workflows";
 import { prefetchWorkflow } from "@/features/workflows/server/prefetch";
+import { inngest } from "@/inngest/client";
 import { requiredAuth } from "@/lib/auth-utils";
 import { HydrateClient } from "@/trpc/server";
 import { Suspense } from "react";
@@ -23,7 +22,12 @@ const Page = async ({ params }: PageProps) => {
   await requiredAuth();
 
   prefetchWorkflow(workflowId);
-
+  inngest.send({
+    name: "execute/ai",
+    data: {
+      workflowId,
+    },
+  });
   return (
     <HydrateClient>
       <ErrorBoundary fallback={<EditorError />}>
