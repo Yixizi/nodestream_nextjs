@@ -4,7 +4,7 @@ import { Node, NodeProps, useReactFlow } from "@xyflow/react";
 import { memo, useState } from "react";
 import { BaseExecutionNode } from "../base-executioon-node";
 import { GlobeIcon } from "lucide-react";
-import { formSchemaType, HttpRequestDialog } from "./dialog";
+import { HttpRequestFormValues, HttpRequestDialog } from "./dialog";
 
 type HttpRequestNodeData = {
   endpoint?: string;
@@ -30,7 +30,7 @@ export const HttpRequestNode = memo(
     const handleOpenSettings = () => {
       setDialogOpen(true);
     };
-    const handleSubmit = (values: formSchemaType) => {
+    const handleSubmit = (values: HttpRequestFormValues) => {
       setNodes((nodes) =>
         nodes.map((node) => {
           if (node.id === props.id) {
@@ -41,6 +41,7 @@ export const HttpRequestNode = memo(
                 endpoint: values.endpoint,
                 method: values.method,
                 body: values.body,
+
               },
             };
           }
@@ -55,9 +56,7 @@ export const HttpRequestNode = memo(
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           onSubmit={handleSubmit}
-          defaultBody={nodeData?.body}
-          defaultEndpoint={nodeData?.endpoint}
-          defaultMethod={nodeData?.method}
+          defaultValues={nodeData}
         />
         <BaseExecutionNode
           {...props}

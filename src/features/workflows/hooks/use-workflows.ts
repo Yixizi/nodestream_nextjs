@@ -98,3 +98,19 @@ export const useUpdateWorkflow = () => {
     }),
   );
 };
+
+//执行工作流
+export const useExecuteWorkflow = () => {
+  const trpc = useTRPC();
+
+  return useMutation(
+    trpc.workflows.execute.mutationOptions({
+      onSuccess: (data) => {
+        toast.success(`工作流 ${data.name} 执行成功`);
+      },
+      onError: (error) => {
+        toast.error(`执行工作流失败: ${error.message}`);
+      },
+    }),
+  );
+};

@@ -1,42 +1,45 @@
+import { NonRetriableError } from "inngest";
 import { inngest } from "./client";
-// import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { createDeepSeek } from "@ai-sdk/deepseek";
-import { generateText } from "ai";
-import * as Sentry from "@sentry/nextjs";
+import prisma from "@/lib/prisma";
+import { topologicalSort } from "./utils";
+import type { NodeType } from "@/generated/prisma/enums";
+import { getExecutor } from "@/features/executions/lib/executor-registry";
 
-// const google = createGoogleGenerativeAI({
-//   apiKey: process.env.GOOGLE_API_KEY,
-// });
-
-const deepseek = createDeepSeek({
-  apiKey: process.env.DEEPSEEK_API_KEY ?? "",
-});
-
-export const execute = inngest.createFunction(
-  { id: "execute-ai" },
-  { event: "execute/ai" },
+export const executeWorkflow = inngest.createFunction(
+  { id: "execute-workflow" },
+  { event: "workflows/execute.workflow" },
   async ({ event, step }) => {
-    Sentry.logger.info("调用成功", { log_source: "sentry_test" });
+    // 接收工作流 ID
+    const workflowId = event.data.workflowId;
+    if (!workflowId) {
+      throw new NonRetriableError("工作流 ID 未获取到");
+    }
 
-    // const { steps: geminiSteps } = await step.ai.wrap(
-    //   "deepseek-generate-text",
-    //   generateText,
-    //   {
-    //     model: deepseek("deepseek-chat"),
-    //     system: "你是助手，请根据用户的问题生成一个回答。",
-    //     prompt: "4 + 5= ?",
-    //     experimental_telemetry: {
-    //       isEnabled: true,
-    //       recordInputs: true,
-    //       recordOutputs: true,
-    //     },
-    //   },
-    // );
+    const sortedNodes = await step.run("prepare-workflow", async () => {
+      const workflow = await prisma.workflow.findUniqueOrThrow({
+        where: {
+          id: workflowId,
+        },
+        include: {
+          nodes: true,
+          connections: true,
+        },
+      });
 
-    console.warn("未找到某些东西");
-    console.error("遇见了某些错误");
-    // console.log(geminiSteps, "调用成功");
-    // return { geminiSteps };
-    return {};
-  },
+      return topologicalSort(workflow.nodes, workflow.connections);
+    });
+
+    let context = event.data.initialData || {};
+
+    for (const node of sortedNodes) {
+      const executor = getExecutor(node.type as NodeType);
+      context = await executor({
+        data: node.data as Record<string, unknown>,
+        nodeId: node.id,
+        step,
+        context,
+      });
+    }
+    return { result: context, workflowId };
+  }
 );

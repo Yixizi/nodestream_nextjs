@@ -7,10 +7,30 @@ import {
 } from "@/trpc/init";
 import z from "zod";
 import { PAGINATION } from "@/config/constants";
-import { NodeType } from "@/generated/prisma/enums";
+import { NodeEnum, NodeType } from "@/generated/prisma/enums";
 import { Edge, Node } from "@xyflow/react";
+import { inngest } from "@/inngest/client";
 
 export const workflowsRouter = createTRPCRouter({
+  execute: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const workflow = await prisma.workflow.findUniqueOrThrow({
+        where: {
+          id: input.id,
+          userId: ctx.auth.user.id,
+        },
+      });
+      // 使用 invoke 代替 send，会等待函数执行完成
+      await inngest.send({
+        name: "workflows/execute.workflow",
+        data: {
+          workflowId: input.id,
+          initialData: {},
+        },
+      });
+      return workflow;
+    }),
   create: premiumProcedure.mutation(async ({ ctx }) => {
     return prisma.workflow.create({
       data: {
@@ -49,7 +69,7 @@ export const workflowsRouter = createTRPCRouter({
               y: z.number(),
             }),
             data: z.record(z.string(), z.any()).optional(),
-          }),
+          })
         ),
         edges: z.array(
           z.object({
@@ -57,9 +77,9 @@ export const workflowsRouter = createTRPCRouter({
             target: z.string(),
             sourceHandle: z.string().nullish(),
             targetHandle: z.string().nullish(),
-          }),
+          })
         ),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       const { id, nodes, edges } = input;
@@ -81,7 +101,7 @@ export const workflowsRouter = createTRPCRouter({
             id: node.id,
             workflowId: id,
             name: node.type || "未知",
-            type: node.type as NodeType,
+            type: node.type as NodeEnum,
             position: node.position,
             data: node.data || {},
           })),
@@ -163,7 +183,7 @@ export const workflowsRouter = createTRPCRouter({
           .max(PAGINATION.MAX_PAGE_SIZE)
           .default(PAGINATION.DEFAULT_PAGE_SIZE),
         search: z.string().default(""),
-      }),
+      })
     )
     .query(async ({ ctx, input }) => {
       const { page, pageSize, search } = input ?? {};

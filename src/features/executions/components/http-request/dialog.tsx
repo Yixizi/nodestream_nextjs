@@ -41,30 +41,26 @@ const formSchema = z.object({
   // .refine() to do
 });
 
-export type formSchemaType = z.infer<typeof formSchema>;
+export type HttpRequestFormValues = z.infer<typeof formSchema>;
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (values: z.infer<typeof formSchema>) => void;
-  defaultEndpoint?: string;
-  defaultMethod?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-  defaultBody?: string;
+  defaultValues?: Partial<HttpRequestFormValues>;
 }
 
 export const HttpRequestDialog = ({
   open,
   onOpenChange,
   onSubmit,
-  defaultEndpoint = "",
-  defaultMethod = "GET",
-  defaultBody = "",
+  defaultValues = {}
 }: Props) => {
-  const form = useForm<formSchemaType>({
+  const form = useForm<HttpRequestFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      endpoint: defaultEndpoint,
-      method: defaultMethod,
-      body: defaultBody,
+      endpoint: defaultValues?.endpoint || '',
+      method: defaultValues?.method || 'GET',
+      body: defaultValues?.body || '',
     },
   });
 
@@ -74,7 +70,7 @@ export const HttpRequestDialog = ({
     defaultValue: "GET", // 建议提供默认值
   });
   const showBodyField = ["POST", "PUT", "PATCH"].includes(watchMethod);
-  const handleSubmit = (data: formSchemaType) => {
+  const handleSubmit = (data: HttpRequestFormValues) => {
     onSubmit(data);
     onOpenChange(false);
   };
@@ -82,12 +78,12 @@ export const HttpRequestDialog = ({
   useEffect(() => {
     if (open) {
       form.reset({
-        endpoint: defaultEndpoint,
-        method: defaultMethod,
-        body: defaultBody,
+        endpoint: defaultValues.endpoint || '',
+        method: defaultValues.method || 'GET',
+        body: defaultValues.body || '',
       });
     }
-  }, [open, defaultBody, defaultEndpoint, defaultMethod, form]);
+  }, [open, defaultValues, form]);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -173,7 +169,7 @@ export const HttpRequestDialog = ({
                     <FormLabel>请求体</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder={`{\n  "userId": "{{httpResponse.data.id}}",\n  "name": "{{httpResponse.data.name}}",\n  "items": "{{httpResponse.data.items}}"\n}`}
+                        placeholder={`{ \n  "userId": "{{httpResponse.data.id}}", \n  "name": "{{httpResponse.data.name}}", \n  "items": "{{httpResponse.data.items}}"\n }`}
                         className=" min-h-[120px] font-mono text-sm"
                         {...field}
                       />
