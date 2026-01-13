@@ -38,6 +38,13 @@ const formSchema = z.object({
     message: "请选择一个有效的HTTP方法",
   }),
   body: z.string().optional(),
+  variableName: z
+    .string()
+    .min(1, { message: "请输入变量名" })
+    .regex(/^[a-zA-Z_$][a-zA-Z0-9_$]*$/, {
+      message:
+        "变量名必须以字母或下划线（或 $）开头，后续只能包含字母、数字、下划线或 $。",
+    }),
   // .refine() to do
 });
 
@@ -53,14 +60,15 @@ export const HttpRequestDialog = ({
   open,
   onOpenChange,
   onSubmit,
-  defaultValues = {}
+  defaultValues = {},
 }: Props) => {
   const form = useForm<HttpRequestFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      endpoint: defaultValues?.endpoint || '',
-      method: defaultValues?.method || 'GET',
-      body: defaultValues?.body || '',
+      variableName: defaultValues?.variableName || "",
+      endpoint: defaultValues?.endpoint || "",
+      method: defaultValues?.method || "GET",
+      body: defaultValues?.body || "",
     },
   });
 
@@ -70,6 +78,12 @@ export const HttpRequestDialog = ({
     defaultValue: "GET", // 建议提供默认值
   });
   const showBodyField = ["POST", "PUT", "PATCH"].includes(watchMethod);
+  const watchVariableName =
+    useWatch({
+      control: form.control,
+      name: "variableName",
+      defaultValue: "myApiCall",
+    }) || "myApiCall";
   const handleSubmit = (data: HttpRequestFormValues) => {
     onSubmit(data);
     onOpenChange(false);
@@ -78,9 +92,10 @@ export const HttpRequestDialog = ({
   useEffect(() => {
     if (open) {
       form.reset({
-        endpoint: defaultValues.endpoint || '',
-        method: defaultValues.method || 'GET',
-        body: defaultValues.body || '',
+        variableName: defaultValues.variableName || "",
+        endpoint: defaultValues.endpoint || "",
+        method: defaultValues.method || "GET",
+        body: defaultValues.body || "",
       });
     }
   }, [open, defaultValues, form]);
@@ -96,6 +111,28 @@ export const HttpRequestDialog = ({
             onSubmit={form.handleSubmit(handleSubmit)}
             className=" space-y-8 mt-4"
           >
+            <FormField
+              control={form.control}
+              name="variableName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>变量名</FormLabel>
+
+                  <FormControl>
+                    <Input placeholder="myApiCall" {...field} />
+                  </FormControl>
+                  {form.formState.errors.endpoint && (
+                    <FormMessage>
+                      {form.formState.errors.endpoint.message}
+                    </FormMessage>
+                  )}
+                  <FormDescription>
+                    使用变量名来引用请求响应中的数据。例如：
+                    {`{{ ${watchVariableName}.httpResponse.data }}`}
+                  </FormDescription>
+                </FormItem>
+              )}
+            ></FormField>
             <FormField
               control={form.control}
               name="method"

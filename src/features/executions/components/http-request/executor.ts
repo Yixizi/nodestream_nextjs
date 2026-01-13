@@ -6,6 +6,7 @@ type HttpRequestData = {
   endpoint?: string;
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   body?: string;
+  variableName?: string;
 };
 
 export const HttpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
@@ -14,9 +15,13 @@ export const HttpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
   context,
   step,
 }) => {
-  const { endpoint, method = "GET", body } = data;
+  const { endpoint, method = "GET", body, variableName } = data;
   if (!endpoint) {
     throw new NonRetriableError("请求节点：未配置请求地址");
+  }
+
+  if (!variableName) {
+    throw new NonRetriableError("请求节点：未配置变量名");
   }
 
   const result = await step.run("http-request", async () => {
@@ -25,6 +30,9 @@ export const HttpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
       if (body) {
         options.body = body;
       }
+      options.headers = {
+        "Content-Type": "application/json",
+      };
     }
     const response = await ky(endpoint, options);
     const contentType = response.headers.get("content-type");
@@ -32,13 +40,24 @@ export const HttpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
     const responseData = contentType?.includes("application/json")
       ? await response.json()
       : await response.text();
-    return {
-      ...context,
+
+    const responsePayload = {
       httpResponse: {
         status: response.status,
         statusText: response.statusText,
         data: responseData,
       },
+    };
+
+    if (variableName) {
+      return {
+        ...context,
+        [variableName]: responsePayload,
+      };
+    }
+    return {
+      ...context,
+      ...responsePayload,
     };
   });
   return result;
