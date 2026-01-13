@@ -41,12 +41,12 @@ export const HttpRequestNode = memo(
                 endpoint: values.endpoint,
                 method: values.method,
                 body: values.body,
-
+                variableName: values.variableName,
               },
             };
           }
           return node;
-        }),
+        })
       );
     };
 
@@ -70,7 +70,7 @@ export const HttpRequestNode = memo(
         />
       </>
     );
-  },
+  }
 );
 
 HttpRequestNode.displayName = "HttpRequestNode";
