@@ -33,10 +33,15 @@ import { useForm, useWatch } from "react-hook-form";
 import z from "zod";
 
 const formSchema = z.object({
-  endpoint: z.url({ message: "请输入一个有效的URL" }),
-  method: z.enum(["GET", "POST", "PUT", "DELETE", "PATCH"], {
-    message: "请选择一个有效的HTTP方法",
-  }),
+  endpoint: z
+    .string()
+    .min(1, { message: "请输入一个有效的URL" }),
+  method: z.enum(
+    ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    {
+      message: "请选择一个有效的HTTP方法",
+    }
+  ),
   body: z.string().optional(),
   variableName: z
     .string()
@@ -48,7 +53,9 @@ const formSchema = z.object({
   // .refine() to do
 });
 
-export type HttpRequestFormValues = z.infer<typeof formSchema>;
+export type HttpRequestFormValues = z.infer<
+  typeof formSchema
+>;
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -77,7 +84,9 @@ export const HttpRequestDialog = ({
     name: "method",
     defaultValue: "GET", // 建议提供默认值
   });
-  const showBodyField = ["POST", "PUT", "PATCH"].includes(watchMethod);
+  const showBodyField = ["POST", "PUT", "PATCH"].includes(
+    watchMethod
+  );
   const watchVariableName =
     useWatch({
       control: form.control,
@@ -104,7 +113,9 @@ export const HttpRequestDialog = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>HTTP请求</DialogTitle>
-          <DialogDescription>配置HTTP请求的节点</DialogDescription>
+          <DialogDescription>
+            配置HTTP请求的节点
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -119,11 +130,17 @@ export const HttpRequestDialog = ({
                   <FormLabel>变量名</FormLabel>
 
                   <FormControl>
-                    <Input placeholder="myApiCall" {...field} />
+                    <Input
+                      placeholder="myApiCall"
+                      {...field}
+                    />
                   </FormControl>
                   {form.formState.errors.endpoint && (
                     <FormMessage>
-                      {form.formState.errors.endpoint.message}
+                      {
+                        form.formState.errors.endpoint
+                          .message
+                      }
                     </FormMessage>
                   )}
                   <FormDescription>
@@ -149,11 +166,21 @@ export const HttpRequestDialog = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="GET">GET</SelectItem>
-                      <SelectItem value="POST">POST</SelectItem>
-                      <SelectItem value="PUT">PUT</SelectItem>
-                      <SelectItem value="PATCH">PATCH</SelectItem>
-                      <SelectItem value="DELETE">DELETE</SelectItem>
+                      <SelectItem value="GET">
+                        GET
+                      </SelectItem>
+                      <SelectItem value="POST">
+                        POST
+                      </SelectItem>
+                      <SelectItem value="PUT">
+                        PUT
+                      </SelectItem>
+                      <SelectItem value="PATCH">
+                        PATCH
+                      </SelectItem>
+                      <SelectItem value="DELETE">
+                        DELETE
+                      </SelectItem>
                       {/* <SelectItem value="GET">获取</SelectItem>
                       <SelectItem value="POST">发布</SelectItem>
                       <SelectItem value="PUT">更新</SelectItem>
@@ -166,7 +193,9 @@ export const HttpRequestDialog = ({
                       {form.formState.errors.method.message}
                     </FormMessage>
                   )}
-                  <FormDescription>该请求将使用此方法</FormDescription>
+                  <FormDescription>
+                    该请求将使用此方法
+                  </FormDescription>
                 </FormItem>
               )}
             ></FormField>
@@ -185,14 +214,22 @@ export const HttpRequestDialog = ({
                   </FormControl>
                   {form.formState.errors.endpoint && (
                     <FormMessage>
-                      {form.formState.errors.endpoint.message}
+                      {
+                        form.formState.errors.endpoint
+                          .message
+                      }
                     </FormMessage>
                   )}
                   <FormDescription>
-                    输入完整的 URL 地址。如需动态替换值，使用 {"{{变量名}}"}{" "}
-                    插入简单值（如字符串、数字）， 或使用 {"{{json 变量名}}"}{" "}
-                    插入整个对象（会自动转换为 JSON 字符串）。
-                    例如：https://api.example.com/users/{"{{userId}}"}
+                    输入完整的 URL
+                    地址。如需动态替换值，使用{" "}
+                    {"{{变量名}}"}{" "}
+                    插入简单值（如字符串、数字）， 或使用{" "}
+                    {"{{json 变量名}}"}{" "}
+                    插入整个对象（会自动转换为 JSON
+                    字符串）。
+                    例如：https://api.example.com/users/
+                    {"{{userId}}"}
                   </FormDescription>
                 </FormItem>
               )}
@@ -217,11 +254,15 @@ export const HttpRequestDialog = ({
                       </FormMessage>
                     )}
                     <FormDescription>
-                      输入 JSON 格式的请求体。使用 {"{{变量名}}"}{" "}
-                      插入简单值（字符串、数字等）， 使用 {"{{json 变量名}}"}{" "}
-                      插入整个对象（会自动序列化为 JSON 字符串）。 例如：
-                      {"{{userId}}"} 会被替换为实际值，{"{{json userData}}"}{" "}
-                      会被替换为完整的 JSON 对象。
+                      输入 JSON 格式的请求体。使用{" "}
+                      {"{{变量名}}"}{" "}
+                      插入简单值（字符串、数字等）， 使用{" "}
+                      {"{{json 变量名}}"}{" "}
+                      插入整个对象（会自动序列化为 JSON
+                      字符串）。 例如：
+                      {"{{userId}}"} 会被替换为实际值，
+                      {"{{json userData}}"} 会被替换为完整的
+                      JSON 对象。
                     </FormDescription>
                   </FormItem>
                 )}

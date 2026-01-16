@@ -1,4 +1,7 @@
 procs:
+  ngrok:
+    shell: "pnpm run ngrok:dev"
+
   inngest:
     shell: "npx --ignore-scripts=false inngest-cli@latest dev"
 
