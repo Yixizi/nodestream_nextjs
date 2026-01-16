@@ -7,27 +7,32 @@ import {
 } from "@/trpc/init";
 import z from "zod";
 import { PAGINATION } from "@/config/constants";
-import { NodeEnum, NodeType } from "@/generated/prisma/enums";
+import { NodeType } from "@/generated/prisma/enums";
 import { Edge, Node } from "@xyflow/react";
 import { inngest } from "@/inngest/client";
+import { sendWorkflowExecution } from "@/inngest/utils";
 
 export const workflowsRouter = createTRPCRouter({
   execute: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const workflow = await prisma.workflow.findUniqueOrThrow({
-        where: {
-          id: input.id,
-          userId: ctx.auth.user.id,
-        },
-      });
-      // 使用 invoke 代替 send，会等待函数执行完成
-      await inngest.send({
-        name: "workflows/execute.workflow",
-        data: {
-          workflowId: input.id,
-          initialData: {},
-        },
+      const workflow =
+        await prisma.workflow.findUniqueOrThrow({
+          where: {
+            id: input.id,
+            userId: ctx.auth.user.id,
+          },
+        });
+      // // 使用 invoke 代替 send，会等待函数执行完成
+      // await inngest.send({
+      //   name: "workflows/execute.workflow",
+      //   data: {
+      //     workflowId: input.id,
+      //   },
+      // });
+
+      await sendWorkflowExecution({
+        workflowId: input.id,
       });
       return workflow;
     }),
@@ -83,12 +88,13 @@ export const workflowsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { id, nodes, edges } = input;
-      const workflow = await prisma.workflow.findUniqueOrThrow({
-        where: {
-          id,
-          userId: ctx.auth.user.id,
-        },
-      });
+      const workflow =
+        await prisma.workflow.findUniqueOrThrow({
+          where: {
+            id,
+            userId: ctx.auth.user.id,
+          },
+        });
       //保证以下所有数据库操作要么全部成功，要么全部回滚（防止部分更新破坏一致性
       return await prisma.$transaction(async (tx) => {
         await tx.node.deleteMany({
@@ -101,7 +107,7 @@ export const workflowsRouter = createTRPCRouter({
             id: node.id,
             workflowId: id,
             name: node.type || "未知",
-            type: node.type as NodeEnum,
+            type: node.type as NodeType,
             position: node.position,
             data: node.data || {},
           })),
@@ -127,7 +133,9 @@ export const workflowsRouter = createTRPCRouter({
       });
     }),
   updateName: protectedProcedure
-    .input(z.object({ id: z.string(), name: z.string().min(1) }))
+    .input(
+      z.object({ id: z.string(), name: z.string().min(1) })
+    )
     .mutation(async ({ ctx, input }) => {
       return prisma.workflow.update({
         where: {
@@ -142,16 +150,17 @@ export const workflowsRouter = createTRPCRouter({
   getOne: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const workflow = await prisma.workflow.findUniqueOrThrow({
-        where: {
-          id: input.id,
-          userId: ctx.auth.user.id,
-        },
-        include: {
-          nodes: true,
-          connections: true,
-        },
-      });
+      const workflow =
+        await prisma.workflow.findUniqueOrThrow({
+          where: {
+            id: input.id,
+            userId: ctx.auth.user.id,
+          },
+          include: {
+            nodes: true,
+            connections: true,
+          },
+        });
       const nodes: Node[] = workflow.nodes.map((node) => ({
         id: node.id,
         type: node.type,
@@ -159,13 +168,15 @@ export const workflowsRouter = createTRPCRouter({
         data: (node.data as Record<string, unknown>) || {},
       }));
 
-      const edges: Edge[] = workflow.connections.map((connection) => ({
-        id: connection.id,
-        source: connection.fromNodeId,
-        target: connection.toNodeId,
-        sourceHandle: connection.fromOutput,
-        targetHandle: connection.toInput,
-      }));
+      const edges: Edge[] = workflow.connections.map(
+        (connection) => ({
+          id: connection.id,
+          source: connection.fromNodeId,
+          target: connection.toNodeId,
+          sourceHandle: connection.fromOutput,
+          targetHandle: connection.toInput,
+        })
+      );
       return {
         id: workflow.id,
         name: workflow.name,
