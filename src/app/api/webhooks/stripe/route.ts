@@ -18,14 +18,12 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const formData = {
-      formId: body.formId,
-      formTitle: body.formTitle,
-      responseId: body.responseId,
-      timestamp: body.timestamp,
-      respondentEmail: body.respondentEmail,
-      responses: body.responses,
-      raw: body,
+    const stripeData = {
+      eventId: body.id,
+      eventType: body.type,
+      timestamp: body.created,
+      livemode: body.livemode,
+      raw: body.data?.object,
     };
 
     await inngest.send({
@@ -33,10 +31,11 @@ export async function POST(request: NextRequest) {
       data: {
         workflowId,
         initialData: {
-          googleForm: formData,
+          stripe: stripeData,
         },
       },
     });
+
     return NextResponse.json(
       {
         success: true,
@@ -46,11 +45,11 @@ export async function POST(request: NextRequest) {
       }
     );
   } catch (error) {
-    console.error("Google Form Webhook Error:", error);
+    console.error("Stripe Webhook Error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "未能处理 Google 表单 Webhook 请求",
+        error: "未能处理 Stripe Webhook 请求",
       },
       {
         status: 500,

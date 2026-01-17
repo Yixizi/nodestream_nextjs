@@ -54,16 +54,6 @@ export const HttpRequestExecutor: NodeExecutor<
     throw new NonRetriableError("请求节点：未配置变量名");
   }
 
-  if (!method) {
-    await publish(
-      httpRequestChannel().status({
-        nodeId,
-        status: "error",
-      })
-    );
-    throw new NonRetriableError("请求节点：未配置请求方法");
-  }
-
   try {
     const result = await step.run(
       "http-request",
@@ -73,9 +63,22 @@ export const HttpRequestExecutor: NodeExecutor<
         // 执行已编译的模板，并将输出结果打印到控制台
         // console.log(template({ doesWhat: "rocks!" }));
 
+        if (!method) {
+          await publish(
+            httpRequestChannel().status({
+              nodeId,
+              status: "error",
+            })
+          );
+          throw new NonRetriableError(
+            "请求节点：未配置请求方法"
+          );
+        }
+
         const compiledEndpoint =
           Handlebars.compile(endpoint)(context);
         const options: KyOptions = { method };
+
         if (["POST", "PUT", "PATCH"].includes(method)) {
           const resolved =
             Handlebars.compile(body)(context);
@@ -110,16 +113,16 @@ export const HttpRequestExecutor: NodeExecutor<
 
         // const compileVariableName = Handlebars.compile(variableName)(context);
 
-        if (variableName) {
-          return {
-            ...context,
-            [variableName]: responsePayload,
-          };
-        }
+        // if (variableName) {
         return {
           ...context,
-          ...responsePayload,
+          [variableName]: responsePayload,
         };
+        // }
+        // return {
+        //   ...context,
+        //   ...responsePayload,
+        // };
       }
     );
 

@@ -38,6 +38,12 @@ const triggerNodes: NodeTypeOption[] = [
     description: "当Google表单被填写提交后触发",
     icon: "/logos/googleform.svg",
   },
+  {
+    type: NodeType.STRIPE_TRIGGER,
+    label: "Stripe触发",
+    description: "当Stripe事件被捕获后触发",
+    icon: "/logos/stripe.svg",
+  },
 ];
 
 const executionNodes: NodeTypeOption[] = [
