@@ -4,6 +4,8 @@ import { manualTriggerExecutor } from "@/features/triggers/conponents/manual-tri
 import { HttpRequestExecutor } from "../components/http-request/executor";
 import { googleFormTriggerExecutor } from "@/features/triggers/conponents/goole-form-trigger/executor";
 import { StripeTriggerExecutor } from "@/features/triggers/conponents/stripe-trigger/executor";
+import { GeminiExecutor } from "../components/gemini/executor";
+import { DeepseekExecutor } from "../components/deepseek/executor";
 
 export const executorRegistr: Record<
   NodeType,
@@ -14,6 +16,8 @@ export const executorRegistr: Record<
   [NodeType.INITIAL]: manualTriggerExecutor,
   [NodeType.HTTP_REQUEST]: HttpRequestExecutor,
   [NodeType.STRIPE_TRIGGER]: StripeTriggerExecutor,
+  [NodeType.GEMINI]: GeminiExecutor,
+  [NodeType.DEEPSEEK]: DeepseekExecutor,
 };
 
 export const getExecutor = (

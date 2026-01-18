@@ -135,10 +135,10 @@ export const HttpRequestDialog = ({
                       {...field}
                     />
                   </FormControl>
-                  {form.formState.errors.endpoint && (
+                  {form.formState.errors.variableName && (
                     <FormMessage>
                       {
-                        form.formState.errors.endpoint
+                        form.formState.errors.variableName
                           .message
                       }
                     </FormMessage>

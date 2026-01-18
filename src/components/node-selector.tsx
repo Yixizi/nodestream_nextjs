@@ -53,6 +53,18 @@ const executionNodes: NodeTypeOption[] = [
     description: "发送HTTP请求,获取响应数据",
     icon: GlobeIcon,
   },
+  {
+    type: NodeType.GEMINI,
+    label: "Gemini",
+    description: "使用Gemini API进行AI处理",
+    icon: "/logos/gemini.svg",
+  },
+  {
+    type: NodeType.DEEPSEEK,
+    label: "Deepseek",
+    description: "使用Deepseek API进行AI处理",
+    icon: "/logos/deepseek.svg",
+  },
 ];
 
 interface NodeSelectorProps {
