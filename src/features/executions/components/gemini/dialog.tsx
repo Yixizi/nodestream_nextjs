@@ -27,11 +27,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
+import { CredentialType } from "@/generated/prisma/enums";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import Image from "next/image";
+import { useEffect, useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import z from "zod";
-
 
 const formSchema = z.object({
   systemPrompt: z.string().optional(),
@@ -45,6 +47,9 @@ const formSchema = z.object({
       message:
         "变量名必须以字母或下划线（或 $）开头，后续只能包含字母、数字、下划线或 $。",
     }),
+  credentialId: z
+    .string()
+    .min(1, { message: "请选择凭证" }),
   // .refine() to do
 });
 
@@ -62,14 +67,25 @@ export const GeminiDialog = ({
   onSubmit,
   defaultValues = {},
 }: Props) => {
+  const {
+    data: credentials,
+    isLoading: isLoadingCredentials,
+    error: errorCredentials,
+  } = useCredentialsByType(CredentialType.GEMINI);
   const form = useForm<GeminiFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      credentialId: defaultValues?.credentialId || "",
       variableName: defaultValues?.variableName || "",
       systemPrompt: defaultValues?.systemPrompt || "",
       userPrompt: defaultValues?.userPrompt || "",
     },
   });
+  const currentCredential = useMemo(() => {
+    return credentials?.find((credential) => {
+      return credential.id === defaultValues?.credentialId;
+    });
+  }, [credentials, defaultValues?.credentialId]);
 
   const watchVariableName =
     useWatch({
@@ -133,6 +149,55 @@ export const GeminiDialog = ({
                 </FormItem>
               )}
             ></FormField>
+
+            <FormField
+              control={form.control}
+              name="credentialId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Gemini 凭证</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    disabled={
+                      isLoadingCredentials ||
+                      !credentials?.length
+                    }
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          className=" w-full"
+                          placeholder={
+                            currentCredential?.name ||
+                            "请选择凭证"
+                          }
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {credentials?.map((credential) => (
+                        <SelectItem
+                          key={credential.id}
+                          value={credential.id}
+                        >
+                          <div className=" flex items-center gap-2">
+                            <Image
+                              src={"/logos/gemini.svg"}
+                              alt="Gemini"
+                              width={16}
+                              height={16}
+                            />
+                            {credential.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage></FormMessage>
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

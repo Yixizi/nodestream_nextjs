@@ -4,6 +4,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import Handlebars from "handlebars";
 import { geminiChannel } from "@/inngest/channel/gemini";
 import { generateText } from "ai";
+import prisma from "@/lib/prisma";
 
 Handlebars.registerHelper("json", function (context) {
   const jsonString = JSON.stringify(context, null, 2);
@@ -15,6 +16,7 @@ type GeminiData = {
   variableName?: string;
   systemPrompt?: string;
   userPrompt?: string;
+  credentialId?: string;
 };
 
 export const GeminiExecutor: NodeExecutor<
@@ -37,6 +39,16 @@ export const GeminiExecutor: NodeExecutor<
     throw new NonRetriableError("变量名未配置");
   }
 
+  if (!data.credentialId) {
+    await publish(
+      geminiChannel().status({
+        nodeId,
+        status: "error",
+      })
+    );
+    throw new NonRetriableError("Gemini 凭证未配置");
+  }
+
   if (!data.userPrompt) {
     await publish(
       geminiChannel().status({
@@ -54,21 +66,29 @@ export const GeminiExecutor: NodeExecutor<
     context
   );
 
-  const credentialValue =
-    process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-  if (!credentialValue) {
+  const credential = await step.run(
+    "get-credential",
+    async () => {
+      return prisma.credential.findUnique({
+        where: {
+          id: data.credentialId,
+        },
+      });
+    }
+  );
+
+  if (!credential) {
     await publish(
       geminiChannel().status({
         nodeId,
         status: "error",
       })
     );
-    throw new NonRetriableError(
-      "GOOGLE_GENERATIVE_AI_API_KEY is not set"
-    );
+    throw new NonRetriableError("Gemini 凭证未找到");
   }
+
   const google = createGoogleGenerativeAI({
-    apiKey: credentialValue,
+    apiKey: credential.value,
   });
 
   try {
