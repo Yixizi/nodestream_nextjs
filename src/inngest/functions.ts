@@ -2,7 +2,10 @@ import { NonRetriableError } from "inngest";
 import { inngest } from "./client";
 import prisma from "@/lib/prisma";
 import { topologicalSort } from "./utils";
-import type { NodeType } from "@/generated/prisma/enums";
+import {
+  ExecutionStatus,
+  type NodeType,
+} from "@/generated/prisma/enums";
 import { getExecutor } from "@/features/executions/lib/executor-registry";
 import { httpRequestChannel } from "./channel/http-request";
 import { manualTriggerChannel } from "./channel/manual-trigger";
@@ -14,7 +17,22 @@ import { slackChannel } from "./channel/slack";
 import { discordChannel } from "./channel/discord";
 
 export const executeWorkflow = inngest.createFunction(
-  { id: "execute-workflow", retries: 0 },
+  {
+    id: "execute-workflow",
+    retries: 0,
+    onFailure: async ({ event, step }) => {
+      return prisma.execution.update({
+        where: {
+          inngestEventId: event.data.event.id,
+        },
+        data: {
+          status: ExecutionStatus.FAILED,
+          error: event.data.error.message,
+          errorStack: event.data.error.stack,
+        },
+      });
+    },
+  },
   {
     event: "workflows/execute.workflow",
     channels: [
@@ -29,11 +47,23 @@ export const executeWorkflow = inngest.createFunction(
     ],
   },
   async ({ event, step, publish }) => {
+    const inngestEventId = event.id;
     // 接收工作流 ID
     const workflowId = event.data.workflowId;
-    if (!workflowId) {
-      throw new NonRetriableError("工作流 ID 未获取到");
+    if (!workflowId || !inngestEventId) {
+      throw new NonRetriableError(
+        "工作流 ID 或 Inngest 事件 ID 未获取到"
+      );
     }
+
+    await step.run("create-execution", async () => {
+      return prisma.execution.create({
+        data: {
+          workflowId,
+          inngestEventId,
+        },
+      });
+    });
 
     const sortedNodes = await step.run(
       "prepare-workflow",
@@ -86,6 +116,20 @@ export const executeWorkflow = inngest.createFunction(
         publish,
       });
     }
+
+    await step.run("update-execution", async () => {
+      return prisma.execution.update({
+        where: {
+          inngestEventId,
+          workflowId,
+        },
+        data: {
+          status: ExecutionStatus.SUCCESS,
+          completedAt: new Date(),
+          output: context,
+        },
+      });
+    });
     return { result: context, workflowId };
   }
 );

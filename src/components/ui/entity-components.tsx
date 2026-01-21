@@ -19,7 +19,12 @@ import {
   EmptyTitle,
 } from "./empty";
 import { cn } from "@/lib/utils";
-import { Card, CardContent, CardDescription, CardTitle } from "./card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from "./card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,7 +56,9 @@ export const EntityHeader = ({
   return (
     <div className=" flex flex-row items-center justify-between gap-x-4">
       <div className=" flex flex-col">
-        <h1 className=" text-lg md:text-xl font-semibold">{title}</h1>
+        <h1 className=" text-lg md:text-xl font-semibold">
+          {title}
+        </h1>
         {description && (
           <p className=" text-xs md:text-sm text-muted-foreground">
             {description}
@@ -59,7 +66,11 @@ export const EntityHeader = ({
         )}
       </div>
       {onNew && !newButtonHref && (
-        <Button size="lg" onClick={onNew} disabled={isCreating || disabled}>
+        <Button
+          size="lg"
+          onClick={onNew}
+          disabled={isCreating || disabled}
+        >
           <PlusIcon size={16} />
           {newButtonLabel}
         </Button>
@@ -79,7 +90,7 @@ export const EntityHeader = ({
 type EntityContainerProps = {
   children: React.ReactNode;
   header: React.ReactNode;
-  search: React.ReactNode;
+  search?: React.ReactNode;
   pagination: React.ReactNode;
 };
 
@@ -148,7 +159,9 @@ export const EntityPagination = ({
       <div className=" flex items-center justify-end space-x-2 py-4 ">
         <Button
           disabled={page <= 1 || disabled}
-          onClick={() => onPageChange(Math.max(page - 1, 1))}
+          onClick={() =>
+            onPageChange(Math.max(page - 1, 1))
+          }
           variant={"outline"}
           size={"sm"}
         >
@@ -156,8 +169,14 @@ export const EntityPagination = ({
         </Button>
 
         <Button
-          disabled={disabled || page >= totalPages || totalPages === 0}
-          onClick={() => onPageChange(Math.min(page + 1, totalPages))}
+          disabled={
+            disabled ||
+            page >= totalPages ||
+            totalPages === 0
+          }
+          onClick={() =>
+            onPageChange(Math.min(page + 1, totalPages))
+          }
           variant={"outline"}
           size={"sm"}
         >
@@ -172,11 +191,17 @@ interface StateViewProps {
   message?: string;
 }
 
-export const LoadingView = ({ message }: StateViewProps) => {
+export const LoadingView = ({
+  message,
+}: StateViewProps) => {
   return (
     <div className=" flex items-center justify-center h-full flex-1 flex-col gap-y-4 ">
       <Loader2Icon className="size-6 animate-spin text-primary" />
-      {!!message && <p className=" text-sm text-muted-foreground">{message}</p>}
+      {!!message && (
+        <p className=" text-sm text-muted-foreground">
+          {message}
+        </p>
+      )}
     </div>
   );
 };
@@ -185,7 +210,11 @@ export const ErrorView = ({ message }: StateViewProps) => {
   return (
     <div className=" flex items-center justify-center h-full flex-1 flex-col gap-y-4 ">
       <AlertTriangleIcon className="size-6  text-primary" />
-      {!!message && <p className=" text-sm text-muted-foreground">{message}</p>}
+      {!!message && (
+        <p className=" text-sm text-muted-foreground">
+          {message}
+        </p>
+      )}
     </div>
   );
 };
@@ -193,7 +222,10 @@ export const ErrorView = ({ message }: StateViewProps) => {
 interface EmptyViewProps extends StateViewProps {
   onNew?: () => void;
 }
-export const EmptyView = ({ message, onNew }: EmptyViewProps) => {
+export const EmptyView = ({
+  message,
+  onNew,
+}: EmptyViewProps) => {
   return (
     <Empty className=" border border-dashed bg-white">
       <EmptyHeader>
@@ -202,7 +234,9 @@ export const EmptyView = ({ message, onNew }: EmptyViewProps) => {
         </EmptyMedia>
       </EmptyHeader>
       <EmptyTitle>暂无数据</EmptyTitle>
-      {!!message && <EmptyDescription>{message}</EmptyDescription>}
+      {!!message && (
+        <EmptyDescription>{message}</EmptyDescription>
+      )}
       {!!onNew && (
         <EmptyContent>
           <Button onClick={onNew}>创建</Button>
@@ -278,14 +312,16 @@ export const EntityItem = ({
         className={cn(
           "p-4 shadow-none hover:shadow cursor-pointer",
           isRemoving && "opacity-50 cursor-not-allowed",
-          className,
+          className
         )}
       >
         <CardContent className=" flex flex-row items-center justify-between p-0">
           <div className=" flex items-center gap-x-4">
             {image}
             <div>
-              <CardTitle className=" text-base font-medium">{title}</CardTitle>
+              <CardTitle className=" text-base font-medium">
+                {title}
+              </CardTitle>
               {subtitle && (
                 <CardDescription className=" text-xs">
                   {subtitle}
@@ -311,7 +347,9 @@ export const EntityItem = ({
                     align="end"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <DropdownMenuItem onClick={handleRemove}>
+                    <DropdownMenuItem
+                      onClick={handleRemove}
+                    >
                       <TrashIcon className="size-4" />
                       删除
                     </DropdownMenuItem>
