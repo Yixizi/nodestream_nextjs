@@ -7,47 +7,39 @@ import {
 } from "@xyflow/react";
 import { memo, useState } from "react";
 import { BaseExecutionNode } from "../base-executioon-node";
-import {
-  DeepseekDialog,
-  DeepseekFormValues,
-} from "@/features/executions/components/deepseek/dialog";
 import { useNodeStatus } from "../../hooks/use-node-status";
-import { DEEPSEEK_CHANNEL_NAME } from "@/inngest/channel/deepseek";
-import { fetchDeepseekToken } from "./actions";
+import { fetchSlackToken } from "./actions";
+import { SlackDialog, SlackFormValues } from "./dialog";
+import { SLACK_CHANNEL_NAME } from "@/inngest/channel/slack";
 
-type DeepseekNodeData = {
-  variableName?: string;
-  systemPrompt?: string;
-  userPrompt?: string;
-  credentialId?: string;
+type SlackNodeData = {
+  webhookUrl?: string;
+  content?: string;
 };
 
-type DeepseekNodeDataProps = Node<DeepseekNodeData>;
+type SlackNodeDataProps = Node<SlackNodeData>;
 
-export const DeepseekNode = memo(
-  (props: NodeProps<DeepseekNodeDataProps>) => {
+export const SlackNode = memo(
+  (props: NodeProps<SlackNodeDataProps>) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const { setNodes } = useReactFlow();
 
     const nodeStatus = useNodeStatus({
       nodeId: props.id,
-      channel: DEEPSEEK_CHANNEL_NAME,
+      channel: SLACK_CHANNEL_NAME,
       topic: "status",
-      refreshToken: fetchDeepseekToken,
+      refreshToken: fetchSlackToken,
     });
 
     const nodeData = props.data;
-    const description = nodeData?.userPrompt
-      ? `deepseek-chat: ${nodeData.userPrompt.slice(
-          0,
-          50
-        )}...`
+    const description = nodeData?.content
+      ? `发送: ${nodeData.content.slice(0, 50)}...`
       : "未配置";
 
     const handleOpenSettings = () => {
       setDialogOpen(true);
     };
-    const handleSubmit = (values: DeepseekFormValues) => {
+    const handleSubmit = (values: SlackFormValues) => {
       setNodes((nodes) =>
         nodes.map((node) => {
           if (node.id === props.id) {
@@ -66,7 +58,7 @@ export const DeepseekNode = memo(
 
     return (
       <>
-        <DeepseekDialog
+        <SlackDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           onSubmit={handleSubmit}
@@ -75,8 +67,8 @@ export const DeepseekNode = memo(
         <BaseExecutionNode
           {...props}
           id={props.id}
-          icon={"/logos/deepseek.svg"}
-          name="Deepseek"
+          icon={"/logos/slack.svg"}
+          name="Slack"
           description={description}
           status={nodeStatus}
           onSettings={handleOpenSettings}
@@ -87,4 +79,4 @@ export const DeepseekNode = memo(
   }
 );
 
-DeepseekNode.displayName = "DeepseekNode";
+SlackNode.displayName = "SlackNode";

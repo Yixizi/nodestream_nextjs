@@ -104,6 +104,7 @@ export const GeminiDialog = ({
         variableName: defaultValues?.variableName || "",
         systemPrompt: defaultValues?.systemPrompt || "",
         userPrompt: defaultValues?.userPrompt || "",
+        credentialId: defaultValues?.credentialId || "",
       });
     }
   }, [open, defaultValues, form]);
@@ -159,6 +160,7 @@ export const GeminiDialog = ({
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    value={field.value}
                     disabled={
                       isLoadingCredentials ||
                       !credentials?.length

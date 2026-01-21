@@ -8,6 +8,7 @@ export type StepTools = GetStepTools<Inngest.Any>;
 export interface NodeExecutorParams<
   TData = Record<string, unknown>
 > {
+  userId: string;
   data: TData;
   nodeId: string;
   context: ExecutorContext;

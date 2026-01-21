@@ -4,6 +4,7 @@ import { createDeepSeek } from "@ai-sdk/deepseek";
 import Handlebars from "handlebars";
 import { generateText } from "ai";
 import { deepseekChannel } from "@/inngest/channel/deepseek";
+import prisma from "@/lib/prisma";
 
 Handlebars.registerHelper("json", function (context) {
   const jsonString = JSON.stringify(context, null, 2);
@@ -15,11 +16,19 @@ type DeepseekData = {
   variableName?: string;
   systemPrompt?: string;
   userPrompt?: string;
+  credentialId?: string;
 };
 
 export const DeepseekExecutor: NodeExecutor<
   DeepseekData
-> = async ({ data, nodeId, context, step, publish }) => {
+> = async ({
+  data,
+  nodeId,
+  context,
+  step,
+  publish,
+  userId,
+}) => {
   await publish(
     deepseekChannel().status({
       nodeId,
@@ -54,20 +63,29 @@ export const DeepseekExecutor: NodeExecutor<
     context
   );
 
-  const credentialValue = process.env.DEEPSEEK_API_KEY;
-  if (!credentialValue) {
+  const credential = await step.run(
+    "get-credential",
+    async () => {
+      return prisma.credential.findUnique({
+        where: {
+          id: data.credentialId,
+          userId,
+        },
+      });
+    }
+  );
+
+  if (!credential) {
     await publish(
       deepseekChannel().status({
         nodeId,
         status: "error",
       })
     );
-    throw new NonRetriableError(
-      "DEEPSEEK_API_KEY is not set"
-    );
+    throw new NonRetriableError("Gemini 凭证未找到");
   }
   const deepseek = createDeepSeek({
-    apiKey: credentialValue,
+    apiKey: credential.value,
   });
 
   try {

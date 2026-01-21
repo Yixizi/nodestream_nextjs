@@ -6,6 +6,8 @@ import { googleFormTriggerExecutor } from "@/features/triggers/conponents/goole-
 import { StripeTriggerExecutor } from "@/features/triggers/conponents/stripe-trigger/executor";
 import { GeminiExecutor } from "../components/gemini/executor";
 import { DeepseekExecutor } from "../components/deepseek/executor";
+import { DiscordExecutor } from "../components/discord/executor";
+import { SlackExecutor } from "../components/slack/executor";
 
 export const executorRegistr: Record<
   NodeType,
@@ -18,6 +20,8 @@ export const executorRegistr: Record<
   [NodeType.STRIPE_TRIGGER]: StripeTriggerExecutor,
   [NodeType.GEMINI]: GeminiExecutor,
   [NodeType.DEEPSEEK]: DeepseekExecutor,
+  [NodeType.DISCORD]: DiscordExecutor,
+  [NodeType.SLACK]: SlackExecutor,
 };
 
 export const getExecutor = (

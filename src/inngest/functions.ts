@@ -10,6 +10,8 @@ import { googleFormTriggerChannel } from "./channel/google-form-trigger";
 import { stripeTriggerChannel } from "./channel/stripe-trigger";
 import { geminiChannel } from "./channel/gemini";
 import { deepseekChannel } from "./channel/deepseek";
+import { slackChannel } from "./channel/slack";
+import { discordChannel } from "./channel/discord";
 
 export const executeWorkflow = inngest.createFunction(
   { id: "execute-workflow", retries: 0 },
@@ -22,6 +24,8 @@ export const executeWorkflow = inngest.createFunction(
       stripeTriggerChannel(),
       geminiChannel(),
       deepseekChannel(),
+      slackChannel(),
+      discordChannel(),
     ],
   },
   async ({ event, step, publish }) => {
@@ -52,11 +56,29 @@ export const executeWorkflow = inngest.createFunction(
       }
     );
 
+    const userId = await step.run(
+      "get-user-id",
+      async () => {
+        const workflow =
+          await prisma.workflow.findUniqueOrThrow({
+            where: {
+              id: workflowId,
+            },
+            select: {
+              userId: true,
+            },
+          });
+
+        return workflow.userId;
+      }
+    );
+
     let context = event.data.initialData || {};
 
     for (const node of sortedNodes) {
       const executor = getExecutor(node.type as NodeType);
       context = await executor({
+        userId,
         data: node.data as Record<string, unknown>,
         nodeId: node.id,
         step,

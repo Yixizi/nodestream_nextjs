@@ -65,6 +65,18 @@ const executionNodes: NodeTypeOption[] = [
     description: "使用Deepseek API进行AI处理",
     icon: "/logos/deepseek.svg",
   },
+  {
+    type: NodeType.DISCORD,
+    label: "Discord",
+    description: "发送消息给Discord",
+    icon: "/logos/discord.svg",
+  },
+  {
+    type: NodeType.SLACK,
+    label: "Slack",
+    description: "发送消息给Slack",
+    icon: "/logos/slack.svg",
+  },
 ];
 
 interface NodeSelectorProps {
