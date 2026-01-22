@@ -42,6 +42,48 @@ export function LoginForm() {
       password: "",
     },
   });
+  const signInWithGithub = async () => {
+    await signIn.social(
+      {
+        provider: "github",
+        callbackURL: "/",
+      },
+      {
+        onSuccess: () => {
+          router.push("/");
+        },
+        onError: (ctx) => {
+          console.log(ctx.error);
+          toast.error(
+            ctx.error.code === "INVALID_EMAIL_OR_PASSWORD"
+              ? "邮箱或密码错误"
+              : "登录失败"
+          );
+        },
+      }
+    );
+  };
+  const signInWithGoogle = async () => {
+    await signIn.social(
+      {
+        provider: "google",
+        callbackURL: "/",
+      },
+      {
+        onSuccess: () => {
+          router.push("/");
+        },
+        onError: (ctx) => {
+          console.log(ctx.error);
+          toast.error(
+            ctx.error.code === "INVALID_EMAIL_OR_PASSWORD"
+              ? "邮箱或密码错误"
+              : "登录失败"
+          );
+        },
+      }
+    );
+  };
   const onSubmit = async (data: loginFormValues) => {
     console.log(data);
     await signIn.email(
@@ -59,10 +101,10 @@ export function LoginForm() {
           toast.error(
             ctx.error.code === "INVALID_EMAIL_OR_PASSWORD"
               ? "邮箱或密码错误"
-              : "登录失败",
+              : "登录失败"
           );
         },
-      },
+      }
     );
   };
   const isPending = form.formState.isSubmitting;
@@ -74,15 +116,21 @@ export function LoginForm() {
           <CardTitle className=" text-2xl font-bold text-center">
             欢迎回来
           </CardTitle>
-          <CardDescription className=" text-center">登录以继续</CardDescription>
+          <CardDescription className=" text-center">
+            登录以继续
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-8"
+            >
               <div className=" grid gap-6">
                 {/* 第三方登录 */}
                 <div className=" flex flex-col gap-4 ">
                   <Button
+                    onClick={signInWithGithub}
                     variant={"outline"}
                     className=" w-full font-bold"
                     type="button"
@@ -97,6 +145,7 @@ export function LoginForm() {
                     GitHub登录
                   </Button>
                   <Button
+                    onClick={signInWithGoogle}
                     variant={"outline"}
                     className=" w-full font-bold"
                     type="button"
