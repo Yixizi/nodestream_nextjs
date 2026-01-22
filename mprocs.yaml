@@ -3,7 +3,7 @@ procs:
     shell: "pnpm run ngrok:dev"
 
   inngest:
-    shell: "npx --ignore-scripts=false inngest-cli@latest dev"
+    shell: "npx --ignore-scripts=false inngest-cli@1.16.1 dev"
 
   next:
     shell: "pnpm run dev"

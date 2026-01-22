@@ -40,7 +40,13 @@ import { CredentialType } from "@/generated/prisma/enums";
 
 const formSchema = z.object({
   name: z.string().min(1, "名称是必填项"),
-  type: z.enum(CredentialType, "凭证类型是必填项"),
+  type: z.enum(
+    Object.values(CredentialType) as [
+      CredentialType,
+      ...CredentialType[]
+    ],
+    "凭证类型是必填项"
+  ),
   value: z.string().min(1, "值是必填项"),
 });
 
@@ -88,6 +94,7 @@ export const CredentialForm = ({
   });
 
   const onSubmit = async (values: FormValues) => {
+    // console.log(values);
     if (isEdit && initialData?.id) {
       updateCredential.mutateAsync({
         id: initialData.id,
@@ -146,7 +153,7 @@ export const CredentialForm = ({
                   <FormItem>
                     <FormLabel>凭证类型</FormLabel>
                     <Select
-                      onOpenChange={field.onChange}
+                      onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>

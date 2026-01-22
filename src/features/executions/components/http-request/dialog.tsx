@@ -42,7 +42,6 @@ const formSchema = z.object({
       message: "请选择一个有效的HTTP方法",
     }
   ),
-  body: z.string().optional(),
   variableName: z
     .string()
     .min(1, { message: "请输入变量名" })
@@ -50,6 +49,7 @@ const formSchema = z.object({
       message:
         "变量名必须以字母或下划线（或 $）开头，后续只能包含字母、数字、下划线或 $。",
     }),
+  body: z.string().optional(),
   // .refine() to do
 });
 

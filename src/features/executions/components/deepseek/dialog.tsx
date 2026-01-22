@@ -158,7 +158,7 @@ export const DeepseekDialog = ({
               name="credentialId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Gemini 凭证</FormLabel>
+                  <FormLabel>Deepseek 凭证</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}

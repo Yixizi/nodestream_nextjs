@@ -5,6 +5,7 @@ import Handlebars from "handlebars";
 import { generateText } from "ai";
 import { deepseekChannel } from "@/inngest/channel/deepseek";
 import prisma from "@/lib/prisma";
+import { decrypt } from "@/lib/encryption";
 
 Handlebars.registerHelper("json", function (context) {
   const jsonString = JSON.stringify(context, null, 2);
@@ -85,7 +86,7 @@ export const DeepseekExecutor: NodeExecutor<
     throw new NonRetriableError("Gemini 凭证未找到");
   }
   const deepseek = createDeepSeek({
-    apiKey: credential.value,
+    apiKey: decrypt(credential.value),
   });
 
   try {
